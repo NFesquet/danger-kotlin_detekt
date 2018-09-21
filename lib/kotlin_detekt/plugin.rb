@@ -1,23 +1,28 @@
 module Danger
-  # This is your plugin class. Any attributes or methods you expose here will
-  # be available from within your Dangerfile.
+  # Detekt files of a gradle based Android project.
+  # This is done using the Android's [Detekt](https://github.com/arturbosch/detekt) tool.
+  # Results are passed out as tables in markdown.
   #
-  # To be published on the Danger plugins site, you will need to have
-  # the public interface documented. Danger uses [YARD](http://yardoc.org/)
-  # for generating documentation from your plugin source, and you can verify
-  # by running `danger plugins lint` or `bundle exec rake spec`.
+  # @example Running KotlinDetekt with its basic configuration
   #
-  # You should replace these comments with a public description of your library.
+  #          kotlin_detekt.detekt
   #
-  # @example Ensure people are well warned about merging on Mondays
+  # @example Running KotlinDetekt with a specific gradle task
   #
-  #          my_plugin.warn_on_mondays
+  #          kotlin_detekt.gradle_task = "detektCheckMyFlavorDebug"
+  #          kotlin_detekt.detekt
   #
-  # @see  Nicolas Fesquet/danger-kotlin_detekt
-  # @tags monday, weekends, time, rattata
+  # @example Running KotlinDetekt for a specific severity level and up
+  #
+  #          # options are ["warning", "error"]
+  #          kotlin_detekt.severity = "error"
+  #          kotlin_detekt.detekt
+  #
+  # @see  NFesquet/danger-kotlin_detekt
+  # @tags danger, detekt, kotlin
   #
   class DangerKotlinDetekt < Plugin
-    SEVERITY_LEVELS = ["warning", "error"]
+    SEVERITY_LEVELS = %w(warning error).freeze
 
     # Location of Detekt report file
     # If your Detekt task outputs to a different location, you can specify it here.
@@ -27,7 +32,7 @@ module Danger
     # A getter for `report_file`.
     # @return [String]
     def report_file
-      return @report_file || 'build/reports/detekt/detekt-checkstyle.xml'
+      return @report_file || "build/reports/detekt/detekt-checkstyle.xml"
     end
 
     # Custom gradle task to run.
@@ -57,7 +62,7 @@ module Danger
     # @return [void]
     #
     def detekt(inline_mode: false)
-      if !skip_gradle_task && !gradlew_exists?
+      unless skip_gradle_task || gradlew_exists?
         fail("Could not find `gradlew` inside current directory")
         return
       end
@@ -97,10 +102,10 @@ module Danger
     def read_issues_from_report
       file = File.open(report_file)
 
-      require 'oga'
+      require "oga"
       report = Oga.parse_xml(file)
 
-      report.xpath('//error')
+      report.xpath("//error")
     end
 
     def filter_issues_by_severity(issues)
@@ -117,7 +122,7 @@ module Danger
       message = ""
 
       SEVERITY_LEVELS.reverse.each do |level|
-        filtered = issues.select{|issue| issue.get("severity") == level}
+        filtered = issues.select { |issue| issue.get("severity") == level }
         message << parse_results(filtered, level) unless filtered.empty?
       end
 
@@ -132,10 +137,10 @@ module Danger
 
       results.each do |r|
         location = r.parent
-        filename = location.get('name').gsub(dir, "")
+        filename = location.get("name").gsub(dir, "")
         next unless !filtering || (target_files.include? filename)
-        line = r.get('line') || 'N/A'
-        reason = r.get('message')
+        line = r.get("line") || "N/A"
+        reason = r.get("message")
         count += 1
         message << "`#{filename}` | #{line} | #{reason} \n"
       end
@@ -149,22 +154,21 @@ module Danger
       message
     end
 
-
     # Send inline comment with danger's warn or fail method
     #
     # @return [void]
-    def send_inline_comment (issues)
+    def send_inline_comment(issues)
       target_files = (git.modified_files - git.deleted_files) + git.added_files
       dir = "#{Dir.pwd}/"
       SEVERITY_LEVELS.reverse.each do |level|
-        filtered = issues.select{|issue| issue.get("severity") == level}
+        filtered = issues.select { |issue| issue.get("severity") == level }
         next if filtered.empty?
         filtered.each do |r|
           location = r.parent
-          filename = location.get('name').gsub(dir, "")
+          filename = location.get("name").gsub(dir, "")
           next unless !filtering || (target_files.include? filename)
-          line = (r.get('line') || "0").to_i
-          send(level === "warning" ? "warn" : "fail", r.get('message'), file: filename, line: line)
+          line = (r.get("line") || "0").to_i
+          send(level == "warning" ? "warn" : "fail", r.get("message"), file: filename, line: line)
         end
       end
     end
