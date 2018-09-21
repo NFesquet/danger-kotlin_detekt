@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ['n.fesquet@betclicgroup.com']
   spec.description   = %q{A short description of danger-kotlin_detekt.}
   spec.summary       = %q{A longer description of danger-kotlin_detekt.}
-  spec.homepage      = 'https://github.com/Nicolas Fesquet/danger-kotlin_detekt'
+  spec.homepage      = 'https://github.com/NFesquet/danger-kotlin_detekt'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files`.split($/)
