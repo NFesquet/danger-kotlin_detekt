@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    danger-kotlin_detekt (0.0.1)
+    danger-kotlin_detekt (0.0.3)
       danger-plugin-api (~> 1.0)
 
 GEM

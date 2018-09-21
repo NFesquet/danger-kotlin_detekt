@@ -19,9 +19,9 @@ module Danger
   class DangerKotlinDetekt < Plugin
     SEVERITY_LEVELS = ["warning", "error"]
 
-    # Location of lint report file
-    # If your Android lint task outputs to a different location, you can specify it here.
-    # Defaults to "app/build/reports/lint/lint-result.xml".
+    # Location of Detekt report file
+    # If your Detekt task outputs to a different location, you can specify it here.
+    # Defaults to "build/reports/detekt/detekt-checkstyle.xml".
     # @return [String]
     attr_accessor :report_file
     # A getter for `report_file`.
@@ -32,7 +32,7 @@ module Danger
 
     # Custom gradle task to run.
     # This is useful when your project has different flavors.
-    # Defaults to "lint".
+    # Defaults to "detektCheck".
     # @return [String]
     attr_accessor :gradle_task
 
@@ -50,7 +50,7 @@ module Danger
     # Skip gradle task
     attr_accessor :skip_gradle_task
 
-    # Calls lint task of your gradle project.
+    # Calls Detekt task of your gradle project.
     # It fails if `gradlew` cannot be found inside current directory.
     # It fails if `severity` level is not a valid option.
     # It fails if `xmlReport` configuration is not set to `true` in your `build.gradle` file.
@@ -67,10 +67,10 @@ module Danger
         return
       end
 
-      system "./gradlew #{gradle_task || 'lint'}" unless skip_gradle_task
+      system "./gradlew #{gradle_task || 'detektCheck'}" unless skip_gradle_task
 
       unless File.exist?(report_file)
-        fail("Lint report not found at `#{report_file}`. "\
+        fail("Detekt report not found at `#{report_file}`. "\
           "Have you forgot to add `xmlReport true` to your `build.gradle` file?")
       end
 
@@ -82,7 +82,7 @@ module Danger
         send_inline_comment(filtered_issues)
       else
         message = message_for_issues(filtered_issues)
-        markdown("### AndroidLint found issues\n\n" + message) unless message.to_s.empty?
+        markdown("### Detekt found issues\n\n" + message) unless message.to_s.empty?
       end
     end
 
@@ -160,11 +160,11 @@ module Danger
         filtered = issues.select{|issue| issue.get("severity") == level}
         next if filtered.empty?
         filtered.each do |r|
-          location = r.xpath('location').first
-          filename = location.get('file').gsub(dir, "")
+          location = r.parent
+          filename = location.get('name').gsub(dir, "")
           next unless !filtering || (target_files.include? filename)
-          line = (location.get('line') || "0").to_i
-          send(level === "Warning" ? "warn" : "fail", r.get('message'), file: filename, line: line)
+          line = (r.get('line') || "0").to_i
+          send(level === "warning" ? "warn" : "fail", r.get('message'), file: filename, line: line)
         end
       end
     end
