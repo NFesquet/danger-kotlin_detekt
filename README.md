@@ -1,20 +1,55 @@
-# danger-kotlin_detekt
+### kotlin_detekt
 
-A description of danger-kotlin_detekt.
+Detekt files of a gradle based Android project.
+This is done using the Android's [Detekt](https://github.com/arturbosch/detekt) tool.
+Results are passed out as tables in markdown.
 
-## Installation
+<blockquote>Running KotlinDetekt with its basic configuration
+  <pre>
+kotlin_detekt.detekt</pre>
+</blockquote>
 
-    $ gem install danger-kotlin_detekt
+<blockquote>Running KotlinDetekt with a specific gradle task
+  <pre>
+kotlin_detekt.gradle_task = "detektCheckMyFlavorDebug"
+kotlin_detekt.detekt</pre>
+</blockquote>
 
-## Usage
+<blockquote>Running KotlinDetekt for a specific severity level and up
+  <pre>
+# options are ["warning", "error"]
+kotlin_detekt.severity = "error"
+kotlin_detekt.detekt</pre>
+</blockquote>
 
-    Methods and attributes from this plugin are available in
-    your `Dangerfile` under the `kotlin_detekt` namespace.
 
-## Development
 
-1. Clone this repo
-2. Run `bundle install` to setup dependencies.
-3. Run `bundle exec rake spec` to run the tests.
-4. Use `bundle exec guard` to automatically have tests run as you make changes.
-5. Make your changes.
+#### Attributes
+
+`report_file` - Location of Detekt report file
+If your Detekt task outputs to a different location, you can specify it here.
+Defaults to "build/reports/detekt/detekt-checkstyle.xml".
+
+`gradle_task` - Custom gradle task to run.
+This is useful when your project has different flavors.
+Defaults to "detektCheck".
+
+`severity` - Defines the severity level of the execution.
+Selected levels are the chosen one and up.
+Possible values are "Warning", "Error" or "Fatal".
+Defaults to "Warning".
+
+`filtering` - Enable filtering
+Only show messages within changed files.
+
+`skip_gradle_task` - Skip gradle task
+
+
+
+
+#### Methods
+
+`detekt` - Calls Detekt task of your gradle project.
+It fails if `gradlew` cannot be found inside current directory.
+It fails if `severity` level is not a valid option.
+It fails if `xmlReport` configuration is not set to `true` in your `build.gradle` file.
