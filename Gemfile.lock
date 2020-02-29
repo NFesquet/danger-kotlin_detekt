@@ -86,7 +86,7 @@ GEM
     public_suffix (3.0.3)
     rainbow (2.2.2)
       rake
-    rake (10.5.0)
+    rake (13.0.1)
     rb-fsevent (0.10.3)
     rb-inotify (0.9.10)
       ffi (>= 0.5.0, < 2)
@@ -134,7 +134,7 @@ DEPENDENCIES
   guard-rspec (~> 4.7)
   listen (= 3.0.7)
   pry
-  rake (~> 10.0)
+  rake (~> 13.0)
   rspec (~> 3.4)
   rubocop
   yard
