@@ -61,7 +61,7 @@ module Danger
     # It fails if `xmlReport` configuration is not set to `true` in your `build.gradle` file.
     # @return [void]
     #
-    def detekt(inline_mode: false)
+    def detekt(inline_mode: true)
       unless skip_gradle_task || gradlew_exists?
         fail("Could not find `gradlew` inside current directory")
         return
