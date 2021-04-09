@@ -75,8 +75,13 @@ module Danger
       system "./gradlew #{gradle_task || 'detektCheck'}" unless skip_gradle_task
 
       unless File.exist?(report_file)
-        fail("Detekt report not found at `#{report_file}`. "\
-          "Have you forgot to add `xmlReport true` to your `build.gradle` file?")
+        require 'nokogiri'
+        builder = Nokogiri::XML::Builder.new do |xml|
+          xml.checkstyle\ version "8.0"
+        end
+        report_file = File.new("#{report_file}", "w")
+        report_file.puts(builder.to_xml)
+        report_file.close
       end
 
       issues = read_issues_from_report
