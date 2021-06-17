@@ -55,6 +55,9 @@ module Danger
     # Skip gradle task
     attr_accessor :skip_gradle_task
 
+    # Fail if report file contains any issues
+    attr_accessor :fail_on_issues
+
     # Calls Detekt task of your gradle project.
     # It fails if `gradlew` cannot be found inside current directory.
     # It fails if `severity` level is not a valid option.
@@ -170,6 +173,7 @@ module Danger
           line = (r.get("line") || "0").to_i
           send(level == "warning" ? "warn" : "fail", r.get("message"), file: filename, line: line)
         end
+        fail 'Detekt has found some issues' if fail_on_issues
       end
     end
 
