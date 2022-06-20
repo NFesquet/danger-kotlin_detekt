@@ -141,13 +141,14 @@ module Danger
         next unless !filtering || (target_files.include? filename)
         line = r.get("line") || "N/A"
         reason = r.get("message")
+        rule = r.get("source")
         count += 1
-        message << "`#{filename}` | #{line} | #{reason} \n"
+        message << "`#{filename}` | #{line} | #{reason} | #{rule} \n"
       end
       if count != 0
         header = "#### #{heading} (#{count})\n\n"
-        header << "| File | Line | Reason |\n"
-        header << "| ---- | ---- | ------ |\n"
+        header << "| File | Line | Reason | Rule |\n"
+        header << "| ---- | ---- | ------ | ---- |\n"
         message = header + message
       end
 
