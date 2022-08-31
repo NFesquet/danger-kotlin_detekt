@@ -42,6 +42,8 @@ Defaults to "Warning".
 `filtering` - Enable filtering
 Only show messages within changed files.
 
+Additionally, you can further filter to only the modified lines by setting the `filtering_lines` parameter to `true`.
+
 `skip_gradle_task` - Skip gradle task
 
 
