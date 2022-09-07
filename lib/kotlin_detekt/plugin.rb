@@ -55,6 +55,9 @@ module Danger
     # Skip gradle task
     attr_accessor :skip_gradle_task
 
+    # Only shows messages for the modified lines.
+    attr_accessor :filtering_lines
+
     # Calls Detekt task of your gradle project.
     # It fails if `gradlew` cannot be found inside current directory.
     # It fails if `severity` level is not a valid option.
@@ -138,10 +141,14 @@ module Danger
       results.each do |r|
         location = r.parent
         filename = location.get("name").gsub(dir, "")
-        next unless !filtering || (target_files.include? filename)
-        line = r.get("line") || "N/A"
+        next unless (!filtering && !filtering_lines) || (target_files.include? filename)
+        line = r.get("line").to_i || "N/A"
         reason = r.get("message")
         rule = r.get("source")
+        if filtering_lines
+          added_lines = parse_added_line_numbers(git.diff[filename].patch)
+          next unless added_lines.include? line
+        end
         count += 1
         message << "`#{filename}` | #{line} | #{reason} | #{rule} \n"
       end
@@ -167,11 +174,40 @@ module Danger
         filtered.each do |r|
           location = r.parent
           filename = location.get("name").gsub(dir, "")
-          next unless !filtering || (target_files.include? filename)
+          next unless (!filtering && !filtering_lines) || (target_files.include? filename)
           line = (r.get("line") || "0").to_i
+          if filtering_lines
+            added_lines = parse_added_line_numbers(git.diff[filename].patch)
+            next unless added_lines.include? line
+          end
           send(level == "warning" ? "warn" : "fail", r.get("message"), file: filename, line: line)
         end
       end
+    end
+
+    # Parses git diff of a file and retuns an array of added line numbers.
+    def parse_added_line_numbers(diff)
+      current_line_number = nil
+      added_line_numbers = []
+      diff_lines = diff.strip.split("\n")
+      diff_lines.each_with_index do |line, index|
+        if m = /\+(\d+)(?:,\d+)? @@/.match(line)
+          # (e.g. @@ -32,10 +32,7 @@)
+          current_line_number = Integer(m[1])
+        else
+          unless current_line_number.nil?
+            if line.start_with?("+")
+              # added line
+              added_line_numbers.push current_line_number
+              current_line_number += 1
+            elsif !line.start_with?("-")
+              # unmodified line
+              current_line_number += 1
+            end
+          end
+        end
+      end
+      added_line_numbers
     end
 
     def gradlew_exists?
