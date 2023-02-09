@@ -1,4 +1,7 @@
-### kotlin_detekt
+# kotlin_detekt
+
+[![License](http://img.shields.io/badge/license-MIT-green.svg?style=flat)](LICENSE.txt)
+[![Gem](https://img.shields.io/gem/v/danger-kotlin_detekt.svg?style=flat)](https://rubygems.org/gems/danger-kotlin_detekt)
 
 Detekt files of a gradle based Android project.
 This is done using the Android's [Detekt](https://github.com/arturbosch/detekt) tool.
